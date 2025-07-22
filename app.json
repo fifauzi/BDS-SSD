@@ -4,26 +4,55 @@
     "slug": "TrackerApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/logow.jpg",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "scheme": "trackerapp",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F54A38"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#F54A38",
+        "dark": {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#F54A38"
+        }
+      },
+      "bundleIdentifier": "com.trackerapp"
     },
     "android": {
+      "package": "com.trackerapp",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logow.jpg",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "react-native-permissions",
+        {
+          "ios": ["LOCATION_WHEN_IN_USE"],
+          "android": ["android.permission.ACCESS_FINE_LOCATION"]
+        }
+      ],
+      "expo-web-browser"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    },
+    "owner": "fifauzi"
   }
 }
