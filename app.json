@@ -42,17 +42,21 @@
       [
         "react-native-permissions",
         {
-          "ios": ["LOCATION_WHEN_IN_USE"],
-          "android": ["android.permission.ACCESS_FINE_LOCATION"]
+          "ios": [
+            "LOCATION_WHEN_IN_USE"
+          ],
+          "android": [
+            "android.permission.ACCESS_FINE_LOCATION"
+          ]
         }
       ],
       "expo-web-browser"
     ],
+    "owner": "fifauzi",
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "d9fc72d7-d127-49d2-8960-91b4af861205"
       }
-    },
-    "owner": "fifauzi"
+    }
   }
 }
