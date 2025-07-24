@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Platform, Image, TouchableWithoutFeedback, ImageBackground, Dimensions } from 'react-native';
-import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps'; // <<< PROVIDER_GOOGLE
+// =================================================================
+// PERBAIKAN 1: Impor PROVIDER_OSM selain PROVIDER_GOOGLE
+// =================================================================
+import MapView, { Polyline, PROVIDER_GOOGLE, PROVIDER_OSM } from 'react-native-maps';
 import ViewShot from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
@@ -91,11 +94,35 @@ const ShareActivityScreen = ({ route, navigation }) => {
     setIsTransparentBackground(false);
   };
 
+  // =================================================================
+  // PERBAIKAN 2: Logika cerdas untuk memilih provider dan tipe peta
+  // =================================================================
+  const getMapProvider = () => {
+    // Jika transparan, selalu gunakan OSM untuk menghindari logo Google
+    if (isTransparentBackground) {
+        return PROVIDER_OSM;
+    }
+    // Jika tidak, gunakan Google
+    return PROVIDER_GOOGLE;
+  };
+
   const getMapTypeForShare = () => {
+    // Jika transparan DAN di iOS, gunakan tipe 'none' agar peta benar-benar hilang
+    if (isTransparentBackground && Platform.OS === 'ios') {
+        return 'none';
+    }
+    // Untuk kasus lain, gunakan 'standard'
     return "standard";
   };
 
+
   const getCustomMapStyleForShare = () => {
+    // Jika menggunakan OSM, custom style tidak berlaku, jadi kembalikan array kosong
+    if (getMapProvider() === PROVIDER_OSM) {
+        return [];
+    }
+    
+    // Style asli hanya untuk Google Maps
     return [
       { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] },
       { featureType: "all", elementType: "geometry", stylers: [{ visibility: "off" }] },
@@ -114,20 +141,21 @@ const ShareActivityScreen = ({ route, navigation }) => {
       <ScrollView contentContainerStyle={shareStyles.modalScrollViewContent} showsVerticalScrollIndicator={false}>
 
         {/* Share Card Wrapper */}
-        <ViewShot 
-          ref={viewShotRef} 
-          options={{ 
-              format: 'png', 
-              quality: 0.9, 
-              backgroundColor: isTransparentBackground ? 'transparent' : '#161316' 
+        <ViewShot
+          ref={viewShotRef}
+          options={{
+              format: 'png',
+              quality: 0.9,
+              // 'backgroundColor' di ViewShot penting untuk mode transparan
+              backgroundColor: isTransparentBackground ? 'transparent' : '#161316'
           }}
           style={shareStyles.shareCardWrapper}
         >
-          <ImageBackground 
-            source={backgroundImage ? { uri: backgroundImage } : undefined} 
-            style={shareStyles.shareCard} 
+          <ImageBackground
+            source={backgroundImage ? { uri: backgroundImage } : undefined}
+            style={shareStyles.shareCard}
             imageStyle={{ borderRadius: 20 }}
-            resizeMode="cover" 
+            resizeMode="cover"
           >
             {/* Overlay for opacity effect when a background image is used */}
             {(!isTransparentBackground && backgroundImage) && (
@@ -135,13 +163,14 @@ const ShareActivityScreen = ({ route, navigation }) => {
             )}
 
             {/* Content container within the ImageBackground */}
-            <View style={[shareStyles.shareCardContent, 
-                          (!backgroundImage && !isTransparentBackground) ? {backgroundColor: '#161316'} : {} ]}>
+            <View style={[shareStyles.shareCardContent,
+                        (!backgroundImage && !isTransparentBackground) ? {backgroundColor: '#161316'} : {} ]}>
               {/* Map Section */}
               <View style={shareStyles.shareMapContainer}>
                 <MapView
                   ref={mapRef}
                   style={[shareStyles.shareMap, {
+                      // Ini juga penting untuk membuat latar belakang peta transparan
                       backgroundColor: isTransparentBackground ? 'transparent' : 'black'
                   }]}
                   initialRegion={activity.path && activity.path.length > 0 ? {
@@ -155,7 +184,10 @@ const ShareActivityScreen = ({ route, navigation }) => {
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
                   }}
-                  provider={PROVIDER_GOOGLE} // PROVIDER_GOOGLE
+                  // =================================================================
+                  // PERBAIKAN 3: Terapkan fungsi logika yang baru di sini
+                  // =================================================================
+                  provider={getMapProvider()}
                   mapType={getMapTypeForShare()}
                   customMapStyle={getCustomMapStyleForShare()}
                   liteMode={true}
@@ -167,31 +199,18 @@ const ShareActivityScreen = ({ route, navigation }) => {
                       });
                     }
                   }}
-                  // Properti untuk menyembunyikan kontrol UI Google Maps lainnya
-                  moveOnMarkerPress={false} 
-                  pitchEnabled={false} 
-                  rotateEnabled={false} 
-                  scrollEnabled={false} 
-                  zoomEnabled={false} 
-                  toolbarEnabled={false} 
-                  showsCompass={false} 
-                  showsScale={false} 
-                  showsTraffic={false} 
-                  showsIndoors={false} 
-                  showsBuildings={false} 
-                  showsMyLocationButton={false} 
-                  showsPointsOfInterest={false} 
+                  // Properti untuk menonaktifkan semua interaksi peta
+                  moveOnMarkerPress={false} pitchEnabled={false} rotateEnabled={false}
+                  scrollEnabled={false} zoomEnabled={false} toolbarEnabled={false}
+                  showsCompass={false} showsScale={false} showsTraffic={false}
+                  showsIndoors={false} showsBuildings={false} showsMyLocationButton={false}
+                  showsPointsOfInterest={false}
                 >
                   {activity.path && activity.path.length > 0 && (
                     <>
-                      <Polyline coordinates={activity.path} strokeWidth={6} strokeColor="#F54A38" /> 
-                      {/* Marker sudah dihilangkan sesuai permintaan sebelumnya */}
+                      <Polyline coordinates={activity.path} strokeWidth={6} strokeColor="#F54A38" />
                     </>
                   )}
-                  {/* ========================================================================= */}
-                  {/* TAMBAHKAN VIEW INI UNTUK MENUTUPI LOGO GOOGLE */}
-                  {/* ========================================================================= */}
-                  <View style={shareStyles.googleLogoOverlay} /> 
                 </MapView>
               </View>
               
@@ -247,20 +266,20 @@ const ShareActivityScreen = ({ route, navigation }) => {
         <View style={shareStyles.backgroundOptionsContainer}>
           <Text style={shareStyles.optionTitle}>Background Options:</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={shareStyles.optionButtonsScroll}>
-              <TouchableOpacity 
-                  style={[shareStyles.optionButton, (!backgroundImage && !isTransparentBackground) && shareStyles.optionButtonActive]} 
+              <TouchableOpacity
+                  style={[shareStyles.optionButton, (!backgroundImage && !isTransparentBackground) && shareStyles.optionButtonActive]}
                   onPress={setBackgroundToDefaultBlack}
               >
                   <Text style={[shareStyles.optionButtonText, (!backgroundImage && !isTransparentBackground) && shareStyles.optionButtonTextActive]}>Default</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                  style={[shareStyles.optionButton, isTransparentBackground && shareStyles.optionButtonActive]} 
+              <TouchableOpacity
+                  style={[shareStyles.optionButton, isTransparentBackground && shareStyles.optionButtonActive]}
                   onPress={setBackgroundToTransparent}
               >
                   <Text style={[shareStyles.optionButtonText, isTransparentBackground && shareStyles.optionButtonTextActive]}>Transparent</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                  style={[shareStyles.optionButton, backgroundImage && shareStyles.optionButtonActive]} 
+              <TouchableOpacity
+                  style={[shareStyles.optionButton, backgroundImage && shareStyles.optionButtonActive]}
                   onPress={pickImage}
               >
                   <Text style={[shareStyles.optionButtonText, backgroundImage && shareStyles.optionButtonTextActive]}>Upload Photo</Text>
