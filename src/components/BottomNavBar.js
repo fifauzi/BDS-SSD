@@ -17,10 +17,10 @@ const BottomNavBar = ({ onTabPress }) => {
 
   const navItems = [
     { name: 'Home', icon: 'home', lib: Ionicons },
-    { name: 'Peta', icon: 'map-marked-alt', lib: FontAwesome5 },
-    { name: 'Rekam', icon: 'radio-button-on', lib: Ionicons, isCentral: true },
-    { name: 'Grup', icon: 'account-group', lib: MaterialCommunityIcons },
-    { name: 'Anda', icon: 'person', lib: Ionicons },
+    { name: 'Maps', icon: 'map-marked-alt', lib: FontAwesome5 },
+    { name: 'Record', icon: 'radio-button-on', lib: Ionicons, isCentral: true },
+    { name: 'Group', icon: 'account-group', lib: MaterialCommunityIcons },
+    { name: 'Pofile', icon: 'person', lib: Ionicons },
   ];
 
   return (
